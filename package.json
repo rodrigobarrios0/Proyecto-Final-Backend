@@ -7,7 +7,7 @@
   "scripts": {
     "start": "node src/app.js",
     "dev": "nodemon src/app.js"
-},
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",
@@ -16,6 +16,7 @@
     "express": "^5.2.1",
     "express-handlebars": "^8.0.3",
     "mongoose": "^9.6.2",
+    "mongoose-paginate-v2": "^1.9.4",
     "socket.io": "^4.8.3"
   },
   "repository": {
