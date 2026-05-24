@@ -1,26 +1,33 @@
 import express from 'express';
 import dotenv from 'dotenv';
+
 import { connectDB } from './config/db.js';
+
+import productsRouter from './routes/products.router.js';
+import cartsRouter from './routes/carts.router.js';
+
 
 dotenv.config();
 
-const app=express();
-const PORT=process.env.PORT || 8080;
+const app = express();
+const PORT = process.env.PORT || 8080;
 
-//Middleware
+// Middlewares
 app.use(express.json());
-app.use(express.urlencoded({extended:true}));
+app.use(express.urlencoded({ extended: true }));
 
-//Routes de prueba
-app.get('/', (req,res)=>{
-    res.send('Servidor funcionando correctamente');
+// Rutas
+app.use('/api/products', productsRouter);
+app.use('/api/carts', cartsRouter);
+
+// Ruta de prueba
+app.get('/', (req, res) => {
+res.send('Servidor funcionando 🚀');
 });
 
-//Conectar a la base de datos
+// Conexión DB
 connectDB().then(() => {
-    app.listen(PORT, () => {
-        console.log(`Servidor escuchando en el puerto ${PORT}`);
-    });
-}).catch((error) => {
-    console.error('Error al conectar a la base de datos:', error.message);
+app.listen(PORT, () => {
+    console.log(`Servidor escuchando en el puerto ${PORT}`);
+});
 });

@@ -35,53 +35,52 @@ class CartManagerMongo {
         return cart;
     }
 
-    async removeProductFromCart(cartId, productsId){
-        return await Cart.findByIdAndUpdate(
-            cartId,
-            {
-                $pull: {
-                    products: {product: productId}
-                }
-            },
-            {new: true}
-        );
+    async removeProductFromCart(cid, pid) {
+
+    const cart = await Cart.findById(cid);
+
+    if (!cart) return null;
+
+    cart.products = cart.products.filter(
+        item => item.product.toString() !== pid
+    );
+
+    cart.markModified('products');
+    await cart.save();
+    return await Cart.findById(cid).populate('products.product');
     }
 
-    async updateCart(cartId, products){
-        return await Cart.findByIdAndUpdate(
-            cartId,
-            {products},
-            {new:true}
-        );
+    async updateProductQuantity(cid, pid, quantity) {
+    const cart = await Cart.findById(cid);
+    if (!cart) return null;
+    const productInCart = cart.products.find(
+        item => item.product.toString() === pid
+    );
+
+    if (!productInCart) return null;
+    productInCart.quantity = quantity;
+    cart.markModified('products');
+    await cart.save();
+    return cart;
     }
 
-    async updateProductQuantity(cartId, productId, quantity){
-        const cart = await Cart.findById(cartId);
-
-        if (!cart){
-            return null;
-        }
-
-        const product = cart.products.find(
-            item => item.product.toString() === productId
-        );
-
-        if (!product) {
-            return null;
-        };
-
-        product.quantity = quantity;
-
-        await cart.save;
+    async updateCart(cid, products) {
+        const cart = await Cart.findById(cid);
+        if (!cart) return null;
+        cart.products = Array.isArray(products) ? products : [];
+        cart.markModified('products');
+        await cart.save();
         return cart;
     }
 
-    async clearCart(cartId){
-        return await Cart.findByIdAndUpdate(
-            cartId,
-            {products: []},
-            {new: true}
-        );
+    async clearCart(cid) {
+        const cart = await Cart.findById(cid);
+
+        if (!cart) return null;
+        cart.products = [];
+        cart.markModified('products');
+        await cart.save();
+        return cart;
     }
 }
 
