@@ -74,6 +74,16 @@ try {
     req.body
     );
 
+    const io = req.app.get('io');
+
+const products =
+    await productManager.getProducts({
+    limit: 100,
+    page: 1
+    });
+
+io.emit('products', products.docs);
+
     res.status(201).json(newProduct);
 
 } catch (error) {
@@ -103,6 +113,15 @@ try {
 
 // DELETE /api/products/:pid
 router.delete('/:pid', async (req, res) => {
+    const io = req.app.get('io');
+
+const products =
+    await productManager.getProducts({
+    limit: 100,
+    page: 1
+    });
+
+io.emit('products', products.docs);
 try {
     await productManager.deleteProduct(
     req.params.pid

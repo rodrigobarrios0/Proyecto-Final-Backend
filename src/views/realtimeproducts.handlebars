@@ -1,0 +1,38 @@
+<h1>Productos en Tiempo Real 🚀</h1>
+
+<div id="products-container">
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+
+<script>
+
+const socket = io();
+
+socket.on('products', (products) => {
+
+    const container =
+    document.getElementById(
+        'products-container'
+    );
+
+    container.innerHTML = '';
+
+    products.forEach(product => {
+
+    container.innerHTML += `
+        <div>
+        <h2>${product.title}</h2>
+
+        <p>Precio: $${product.price}</p>
+
+        <hr>
+        </div>
+    `;
+
+    });
+
+});
+
+</script>
