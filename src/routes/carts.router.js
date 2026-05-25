@@ -10,7 +10,12 @@ router.post('/', async (req, res) => {
 try {
     const newCart = await cartManager.createCart();
 
-    res.status(201).json(newCart);
+    res.status(201).json({
+    status: 'success',
+    database: newCart.db.name,
+    collection: newCart.collection.name,
+    payload: newCart
+    });
 
 } catch (error) {
     res.status(500).json({

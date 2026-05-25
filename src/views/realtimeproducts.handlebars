@@ -1,38 +1,33 @@
-<h1>Productos en Tiempo Real 🚀</h1>
+<h1>Productos en Tiempo Real</h1>
 
 <div id="products-container">
-
+    <p>Cargando productos...</p>
 </div>
 
 <script src="/socket.io/socket.io.js"></script>
 
 <script>
-
 const socket = io();
 
 socket.on('products', (products) => {
-
-    const container =
-    document.getElementById(
-        'products-container'
-    );
+    const container = document.getElementById('products-container');
 
     container.innerHTML = '';
 
+    if (!products.length) {
+        container.innerHTML = '<p>No hay productos cargados.</p>';
+        return;
+    }
+
     products.forEach(product => {
-
-    container.innerHTML += `
-        <div>
-        <h2>${product.title}</h2>
-
-        <p>Precio: $${product.price}</p>
-
-        <hr>
-        </div>
-    `;
-
+        container.innerHTML += `
+            <div>
+                <h2>${product.title}</h2>
+                <p>Precio: $${product.price}</p>
+                <p>Categoria: ${product.category}</p>
+                <hr>
+            </div>
+        `;
     });
-
 });
-
 </script>

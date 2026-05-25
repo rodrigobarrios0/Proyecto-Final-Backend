@@ -4,6 +4,19 @@ import ProductManagerMongo from '../dao/ProductManagerMongo.js';
 const router = Router();
 const productManager = new ProductManagerMongo();
 
+const emitProducts = async (req) => {
+    const io = req.app.get('io');
+
+    if (!io) return;
+
+    const products = await productManager.getProducts({
+    limit: 100,
+    page: 1
+    });
+
+    io.emit('products', products.docs);
+};
+
 // GET /api/products
 router.get('/', async (req, res) => {
 try {
@@ -21,6 +34,17 @@ try {
     query
     });
 
+    const buildLink = (targetPage) => {
+    const params = new URLSearchParams();
+
+    params.set('page', targetPage);
+    params.set('limit', limit);
+    if (sort) params.set('sort', sort);
+    if (query) params.set('query', query);
+
+    return `/api/products?${params.toString()}`;
+    };
+
     res.json({
     status: 'success',
     payload: result.docs,
@@ -31,10 +55,10 @@ try {
     hasPrevPage: result.hasPrevPage,
     hasNextPage: result.hasNextPage,
     prevLink: result.hasPrevPage
-        ? `/api/products?page=${result.prevPage}`
+        ? buildLink(result.prevPage)
         : null,
     nextLink: result.hasNextPage
-        ? `/api/products?page=${result.nextPage}`
+        ? buildLink(result.nextPage)
         : null
     });
 
@@ -74,17 +98,14 @@ try {
     req.body
     );
 
-    const io = req.app.get('io');
+    await emitProducts(req);
 
-const products =
-    await productManager.getProducts({
-    limit: 100,
-    page: 1
+    res.status(201).json({
+    status: 'success',
+    database: newProduct.db.name,
+    collection: newProduct.collection.name,
+    payload: newProduct
     });
-
-io.emit('products', products.docs);
-
-    res.status(201).json(newProduct);
 
 } catch (error) {
     res.status(500).json({
@@ -102,6 +123,14 @@ try {
         req.body
     );
 
+    if (!updatedProduct) {
+    return res.status(404).json({
+        error: 'Producto no encontrado'
+    });
+    }
+
+    await emitProducts(req);
+
     res.json(updatedProduct);
 
 } catch (error) {
@@ -113,19 +142,18 @@ try {
 
 // DELETE /api/products/:pid
 router.delete('/:pid', async (req, res) => {
-    const io = req.app.get('io');
-
-const products =
-    await productManager.getProducts({
-    limit: 100,
-    page: 1
-    });
-
-io.emit('products', products.docs);
 try {
-    await productManager.deleteProduct(
+    const deletedProduct = await productManager.deleteProduct(
     req.params.pid
     );
+
+    if (!deletedProduct) {
+    return res.status(404).json({
+        error: 'Producto no encontrado'
+    });
+    }
+
+    await emitProducts(req);
 
     res.json({
     message: 'Producto eliminado'

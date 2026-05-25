@@ -5,3 +5,16 @@
 <p>Precio: ${{product.price}}</p>
 
 <p>Stock: {{product.stock}}</p>
+
+<div>
+    <label for="cartId">ID del carrito</label>
+    <input id="cartId" type="text" placeholder="Ingrese el ID del carrito">
+
+    <button id="addToCart" data-product-id="{{product._id}}">
+        Agregar al carrito
+    </button>
+</div>
+
+<p id="addToCartMessage"></p>
+
+<script src="/js/productDetail.js"></script>

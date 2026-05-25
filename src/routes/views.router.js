@@ -2,8 +2,10 @@ import { Router } from 'express';
 
 import Product from '../models/Product.js';
 import Cart from '../models/Cart.js';
+import ProductManagerMongo from '../dao/ProductManagerMongo.js';
 
 const router = Router();
+const productManager = new ProductManagerMongo();
 
 // HOME
 router.get('/', (req, res) => {
@@ -15,10 +17,39 @@ res.render('home');
 // PRODUCTS
 router.get('/products', async (req, res) => {
 
-const products = await Product.find().lean();
+const {
+    limit = 10,
+    page = 1,
+    sort,
+    query
+} = req.query;
+
+const result = await productManager.getProducts({
+    limit,
+    page,
+    sort,
+    query
+});
+
+const buildLink = (targetPage) => {
+    const params = new URLSearchParams();
+
+    params.set('page', targetPage);
+    params.set('limit', limit);
+    if (sort) params.set('sort', sort);
+    if (query) params.set('query', query);
+
+    return `/products?${params.toString()}`;
+};
 
 res.render('products', {
-    products
+    products: result.docs,
+    page: result.page,
+    totalPages: result.totalPages,
+    hasPrevPage: result.hasPrevPage,
+    hasNextPage: result.hasNextPage,
+    prevLink: result.hasPrevPage ? buildLink(result.prevPage) : null,
+    nextLink: result.hasNextPage ? buildLink(result.nextPage) : null
 });
 
 });

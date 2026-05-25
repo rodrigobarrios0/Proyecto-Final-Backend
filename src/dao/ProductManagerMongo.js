@@ -3,6 +3,8 @@ import Product from '../models/Product.js';
 class ProductManagerMongo {
     async getProducts(options = {}){
         const { limit = 10, page = 1, sort, query } = options;
+        const parsedLimit = Number(limit);
+        const parsedPage = Number(page);
 
         const filter = {};
 
@@ -21,8 +23,8 @@ class ProductManagerMongo {
             const result = await Product.paginate(
                 filter,
                 {
-                    limit, 
-                    page,
+                    limit: parsedLimit || 10,
+                    page: parsedPage || 1,
                     sort: Object.keys(sortOption).length ? sortOption : undefined,
                     lean: true
                 }
@@ -41,6 +43,7 @@ class ProductManagerMongo {
 
         async updateProduct(id, updateData){
             delete updateData._id;
+            delete updateData.id;
             return await Product.findByIdAndUpdate(
                 id, 
                 updateData,
